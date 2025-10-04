@@ -1,40 +1,49 @@
-import glob from 'fast-glob'
 import { type Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
+import clsx from 'clsx'
 
 import { Providers } from '@/app/providers'
 import { Layout } from '@/components/Layout'
-import { type Section } from '@/components/SectionProvider'
 
 import '@/styles/tailwind.css'
 
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
+// Use local version of Lexend so that we can use OpenType features
+const lexend = localFont({
+  src: '../fonts/lexend.woff2',
+  display: 'swap',
+  variable: '--font-lexend',
+})
+
 export const metadata: Metadata = {
   title: {
-    template: '%s - Protocol API Reference',
-    default: 'Protocol API Reference',
+    template: '%s - Docs',
+    default: 'CacheAdvance - Never miss the cache again.',
   },
+  description:
+    'Cache every single thing your app could ever do ahead of time, so your code never even has to run at all.',
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  let pages = await glob('**/*.mdx', { cwd: 'src/app' })
-  let allSectionsEntries = (await Promise.all(
-    pages.map(async (filename) => [
-      '/' + filename.replace(/(^|\/)page\.mdx$/, ''),
-      (await import(`./${filename}`)).sections,
-    ]),
-  )) as Array<[string, Array<Section>]>
-  let allSections = Object.fromEntries(allSectionsEntries)
-
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
+    <html
+      lang="en"
+      className={clsx('h-full antialiased', inter.variable, lexend.variable)}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-full bg-white dark:bg-slate-900">
         <Providers>
-          <div className="w-full">
-            <Layout allSections={allSections}>{children}</Layout>
-          </div>
+          <Layout>{children}</Layout>
         </Providers>
       </body>
     </html>
