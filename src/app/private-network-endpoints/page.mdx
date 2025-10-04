@@ -1,0 +1,106 @@
+
+import { Guides } from '@/components/Guides'
+import { Resources } from '@/components/Resources'
+import { HeroPattern } from '@/components/HeroPattern'
+
+<HeroPattern />
+
+# Private Network Endpoints (PNE)
+
+Private Network Endpoints ensure TPStorage is accessible only from approved internal networks or specific allowlisted IPs.  
+This section verifies that firewall and network access control configurations effectively enforce isolation — blocking unauthorized access while allowing legitimate traffic from trusted sources.
+
+---
+
+
+## Test Case PNE-01 — Attempt connection from unauthorized IP should be blocked by firewall 
+
+**Purpose:** Verify the firewall or security groups enforce allowlist by IP — unauthorized IPs must be denied.
+
+**Pre-conditions**
+
+* TPStorage endpoint and port list (e.g., 443, 9000).
+* A test machine whose IP is **not** in the allowlist (external).
+* Access to firewall / security group logs (or admin who can fetch them) is preferred to confirm blocking.
+
+**Tools**
+
+* `curl`, `telnet`, `nc` (netcat)
+* `nmap` (optional)
+* Access to firewall/security group console/logs (e.g., AWS Security Groups, on-prem firewall)
+
+**Steps**
+
+1. From the unauthorized test machine, attempt a simple TCP connect to HTTPS or MinIO port:
+
+    ```
+    # TCP connect test
+    nc -vz <TPSTORAGE_HOST_OR_IP> 443
+    nc -vz <TPSTORAGE_HOST_OR_IP> 9000
+    ```
+
+2. Try an HTTP HEAD (to quickly see response/timeout):
+
+   ```bash
+   curl -I --connect-timeout 10 https://<TPSTORAGE_HOST_OR_IP>/
+   ```
+3. Record the behavior: connection refused vs timed out vs HTTP 403 vs redirect.
+4. On firewall/logging side (ask admin or use console), check logs for the test IP at the time of the test. Look for DENY or DROP entries matching the source IP and destination port.
+
+   * Example (AWS VPC Flow Logs): search for ACCEPT/DENY records for the source IP and destination port/time.
+
+**Expected Result**
+
+* `nc` / `telnet` attempts should fail:
+
+  * Typical output: `Connection timed out` or `Connection refused` (depending on how firewall responds). For strict allowlist, usually *timed out* or *filtered* is preferred.
+* `curl` should time out or show connection refused; it **must not** return a successful HTTP/HTTPS response.
+* Firewall or security logs should show the connection attempt and that it was **blocked/denied** for the unauthorized IP.
+
+**Actual Result:** ✅ Pass
+
+```bash
+curl -I --connect-timeout 10 https://storage1.tpstreams.com
+curl: (28) Connection timeout after 10001 ms
+```
+
+
+---
+
+## Test Case PNE-02 — Verify allowed IPs / subnets can access TPStorage
+
+**Purpose:** Confirm systems from the allowlisted IPs/subnets can reach TPStorage and that access is functional.
+
+**Pre-conditions**
+
+* A test machine inside the allowed subnet/VPC (or with an allowed source IP).
+* TPStorage endpoint and credentials (if performing authenticated operations).
+* Knowledge of the exact allowlist (IP/CIDR) configured in firewall/SGs.
+
+**Tools**
+
+* `curl`, `nc`, `aws` CLI or `mc` (MinIO client) for functional tests
+* `s3cmd` or `aws s3` (if configured), or `mc` for S3-compatible operations
+
+**Steps** A. Connectivity checks (basic)
+
+1. From an allowed-IP machine, test TCP connect:
+
+   ```bash
+   nc -vz <TPSTORAGE_HOST_OR_IP> 443
+   nc -vz <TPSTORAGE_HOST_OR_IP> 9000
+   ```
+2. Test HTTP head:
+
+   ```bash
+   curl -I https://<TPSTORAGE_HOST_OR_IP>/
+   ```
+
+**Expected Result**
+
+* Basic connectivity:
+
+  * `nc` / `curl` should succeed and show open/connectable status.
+* All network-level firewall logs should show ALLOW for the test IP/CIDR.
+
+**Actual Result:** ✅ Pass
