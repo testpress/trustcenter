@@ -17,4 +17,21 @@ export const navigation = [
       // { title: 'Ping / Scan from Outside VPC Should Fail', href: '/docs/pne-outside-vpc' },
     ],
   },
+  {
+    title: 'Segmentation',
+    links: [
+      { title: 'Direct SSH/RDP Access Restriction', href: '/docs/seg-direct-ssh-rdp-blocked' },
+      { title: 'Administrative Access via Bastion or VPN', href: '/docs/seg-admin-access-bastion-vpn' },
+      { title: 'Internal Services Access Restriction', href: '/docs/seg-internal-services-restriction' },
+    ],
+  },
+  {
+    title: 'Fine-grained policies & RBAC',
+    links: [
+      { title: 'Read-only User Restrictions', href: '/docs/auth-rbac-readonly-user' },
+      { title: 'Full-access User Operations', href: '/docs/auth-rbac-full-access-user' },
+      { title: 'Bucket-level Access Enforcement', href: '/docs/auth-rbac-bucket-restriction' },
+      { title: 'Object-level Policy Enforcement', href: '/docs/auth-rbac-object-restriction' },
+    ],
+  },
 ]
