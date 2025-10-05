@@ -34,4 +34,23 @@ export const navigation = [
       { title: 'Object-level Policy Enforcement', href: '/docs/auth-rbac-object-restriction' },
     ],
   },
+  {
+    title: 'Encryption - Data in Transit',
+    links: [
+      { title: 'TLS Enforcement', href: '/docs/enc-tls-data-in-transit' },
+    ],
+  },
+  {
+    title: 'Erasure Coding & Bitrot Detection',
+    links: [
+      { title: 'Object Integrity Verification', href: '/docs/erasure-coding-checksum-validation' },
+    ],
+  },
+  {
+    title: 'Object Versioning',
+    links: [
+      { title: 'Upload, Overwrite, and Recovery', href: '/docs/rd-vr-upload-overwrite' },
+      { title: 'Delete and Recover', href: '/docs/rd-vr-delete-recover' },
+    ],
+  },
 ]
