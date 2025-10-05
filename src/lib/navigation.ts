@@ -10,11 +10,11 @@ export const navigation = [
     ],
   },
   {
-    title: 'Contributing',
+    title: 'Private Network Endpoints',
     links: [
-      { title: 'How to contribute', href: '/docs/how-to-contribute' },
-      { title: 'Architecture guide', href: '/docs/architecture-guide' },
-      { title: 'Design principles', href: '/docs/design-principles' },
+      { title: 'Allowlisted IPs / Subnets Access Verification', href: '/docs/pne-allowed-ips' },
+      { title: 'Connection from Unauthorized IP Should Be Blocked', href: '/docs/pne-unauthorized-ip' },
+      // { title: 'Ping / Scan from Outside VPC Should Fail', href: '/docs/pne-outside-vpc' },
     ],
   },
 ]
