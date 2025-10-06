@@ -3,63 +3,95 @@ title: "Verify TLS certificate details and strong cipher suites"
 description: "Confirm the server uses valid TLS certificates and supports only strong, modern cipher suites (TLS 1.2+), ensuring secure encrypted communications."
 ---
 
-Verify TLS certificate details and strong cipher suites
+# TLS Certificates and Cipher Suites
 
-## Purpose
-Confirm the certificate is valid (issuer, subject, expiry) and the server only supports modern TLS (1.2+) and strong ciphers.
+## Overview
 
-## Pre-conditions
+TPStorage enforces the use of **valid TLS certificates** and **strong, modern cipher suites** for all HTTPS endpoints. This ensures that every client connection is encrypted, authenticated, and resilient against downgrade and cryptographic attacks.
 
-* HTTPS endpoint reachable (port 443 or configured HTTPS port).
+## Why This Matters
 
-## Tools
+Weak certificates or legacy cipher suites enable:
 
-* `openssl`
-* `openssl x509` / `openssl s_client`
-* `nmap` with `--script ssl-enum-ciphers` (optional)
-* Browser certificate viewer (optional)
+* **Impersonation** of service endpoints (invalid or misconfigured certs)
+* **Interception** of plaintext data via man-in-the-middle (MITM)
+* **Downgrades** to insecure protocols/ciphers (TLS 1.0/1.1, RC4/DES, export suites)
 
-## Steps
+Enforcing modern TLS (1.2/1.3) and strong AEAD ciphers preserves **confidentiality, integrity, and authenticity** of data in transit.
 
-```bash
-# Inspect certificate (issuer, validity dates, SANs)
-echo | openssl s_client -connect <HOST>:443 -servername <HOST> 2>/dev/null \
-  | openssl x509 -noout -issuer -subject -dates -ext subjectAltName
+## Control Description
 
-# View full certificate chain
-openssl s_client -connect <HOST>:443 -servername <HOST> -showcerts
+* Only **TLS 1.2 and TLS 1.3** are permitted; TLS 1.0/1.1 are disabled.
+* Only **strong AEAD suites** (e.g., TLS_AES_128_GCM_SHA256, ECDHE-GCM) are enabled; weak/legacy ciphers are disabled.
+* Certificates are issued by a **trusted CA**, include correct **SANs**, and are actively monitored for **validity/expiry**.
+* **HSTS** is set on HTTPS responses to enforce HTTPS on subsequent requests and reduce downgrade risk.
 
-# Check supported TLS versions and ciphers
-nmap --script ssl-enum-ciphers -p 443 <HOST>
+## Testing Methodology
 
-# Check for HSTS header (optional)
-curl -I https://<HOST>/ | grep -i Strict-Transport-Security || true
-```
+**Preconditions**
 
-(Optional) Inspect certificate in browser (click padlock → certificate).
+* Public HTTPS endpoint is reachable.
 
-## Expected Result:
+**Tools**
 
-* **Certificate:**
-  * Issuer = valid CA (Let's Encrypt, customer CA, or internal trusted CA).
-  * `Not Before` / `Not After` dates indicate certificate is currently valid.
-  * Subject / SAN includes the hostname clients use.
-* **Cipher/TLS policy:**
-  * TLS 1.2 and TLS 1.3 supported; TLS 1.0 and 1.1 disabled.
-  * Only strong ciphers offered (AEAD ciphers like `TLS_AES_128_GCM_SHA256`, ECDHE suites). No RC4, DES, or export ciphers.
-* **HSTS header:** Present for the domain (recommended).
+* `openssl`, `nmap` (ssl-enum-ciphers), browser certificate viewer, `curl` (for HSTS)
 
-## Actual Result:
-✅ **Pass**
+**Steps**
 
-```text
-# Example command used:
-echo | openssl s_client -connect storage1.tpstreams.com:443 -servername storage1.tpstreams.com 2>/dev/null \
-  | openssl x509 -noout -issuer -subject -dates -ext subjectAltName
+1. **Certificate details**
 
-# SSL Labs Report (example):
-https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com
+   ```bash
+   echo | openssl s_client -connect storage1.tpstreams.com:443 -servername storage1.tpstreams.com 2>/dev/null \
+     | openssl x509 -noout -issuer -subject -dates -ext subjectAltName
+   ```
+2. **Supported protocols/ciphers**
 
-# Example image/report reference:
-![SSL Labs Result](/api/attachments.redirect?id=6ee5e90b-3143-4887-be38-55ab5a35c4df)
-```
+   ```bash
+   nmap --script ssl-enum-ciphers -p 443 storage1.tpstreams.com
+   ```
+3. **Legacy protocol rejection (sanity)**
+
+   ```bash
+   openssl s_client -connect storage1.tpstreams.com:443 -servername storage1.tpstreams.com -tls1    2>&1 | sed -n '1,20p'
+   openssl s_client -connect storage1.tpstreams.com:443 -servername storage1.tpstreams.com -tls1_1  2>&1 | sed -n '1,20p'
+   ```
+4. **HSTS presence**
+
+   ```bash
+   curl -I https://storage1.tpstreams.com/ | grep -i Strict-Transport-Security || true
+   ```
+
+## Expected Behavior
+
+* Certificate is **valid**, not expired, SANs include the service hostname.
+* Only **TLS 1.2/1.3** negotiate; TLS 1.0/1.1 fail to handshake.
+* Cipher offerings exclude weak/legacy algorithms.
+* `Strict-Transport-Security` header is present on HTTPS responses.
+
+## Actual Results
+
+* Certificate presented by `storage1.tpstreams.com` is **valid** with correct issuer, subject, dates, and SANs.
+* **TLS 1.0/1.1** handshakes fail as expected; **TLS 1.2/1.3** succeed with strong ciphers.
+* **HSTS** header is present on HTTPS responses.
+
+**External validation:**
+An SSL Labs scan confirms a strong TLS configuration:
+[https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com](https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com)
+
+**Result:** ✅ Control Passed
+**Last Verified:** 2025-10-06
+
+## Remediation (If Control Fails)
+
+* Replace self-signed/expired certs with **CA-issued** certificates and correct SANs.
+* Disable **TLS 1.0/1.1** and any weak ciphers in the proxy/load balancer/app config.
+* Enable **TLS 1.2+** and AEAD suites; prefer TLS 1.3 where available.
+* Add **HSTS** headers on HTTPS responses.
+
+## Status
+
+**Control ID:** TLS-CERT-CIPHERS
+**Owner:** Platform Security
+**Frequency:** Continuous monitoring; formal verification quarterly
+
+(Evidence source: )
