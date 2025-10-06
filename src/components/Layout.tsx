@@ -47,8 +47,10 @@ function Header() {
         <MobileNavigation />
       </div>
       <div className="relative flex grow basis-0 items-center">
-        <Link href="/" aria-label="Home page">
-          <Logomark className="h-9 w-9 lg:hidden" />
+        <Link
+          href="https://github.com/testpress/trustcenter"
+          aria-label="GitHub repository"
+        >
           <Logo className="hidden h-9 w-auto fill-slate-700 lg:block dark:fill-sky-100" />
         </Link>
       </div>
@@ -57,9 +59,7 @@ function Header() {
       </div>
       <div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:grow">
         <ThemeSelector className="relative z-10" />
-        <Link href="https://github.com" className="group" aria-label="GitHub">
-          <GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
-        </Link>
+
       </div>
     </header>
   )
@@ -72,8 +72,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex w-full flex-col">
       <Header />
-
-      {isHomePage && <Hero />}
 
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
         <div className="hidden lg:relative lg:block lg:flex-none">
