@@ -48,8 +48,8 @@ function Header() {
       </div>
       <div className="relative flex grow basis-0 items-center">
         <Link
-          href="/"
-          aria-label="GitHub repository"
+          href="/trustcenter"
+          aria-label="TrustCenter"
         >
           <Logo className="hidden h-9 w-auto fill-slate-700 lg:block dark:fill-sky-100" />
         </Link>
