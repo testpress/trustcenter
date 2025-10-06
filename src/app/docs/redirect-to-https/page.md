@@ -76,12 +76,21 @@ curl -v --max-redirs 0 http://storage1.tpstreams.com/
 Testing was performed on `storage1.tpstreams.com`.
 The server responded to HTTP requests with **403 Forbidden** and included a valid `Strict-Transport-Security` header. HTTPS connections succeeded as expected.
 
-Example output:
-
+```bash
+curl -v --max-redirs 0 http://storage1.tpstreams.com/ 2>&1 | sed -n '1,200p'
 ```
+
+Example output:
+```bash
+* Host storage1.tpstreams.com:80 was resolved.
+* Connected to storage1.tpstreams.com (65.109.153.91) port 80
+> GET / HTTP/1.1
+> Host: storage1.tpstreams.com
+...
 < HTTP/1.1 403 Forbidden
 < Server: nginx/1.18.0 (Ubuntu)
 < Strict-Transport-Security: max-age=31536000; includeSubDomains
+...
 <Error><Code>AccessDenied</Code><Message>Access Denied.</Message></Error>
 ```
 
