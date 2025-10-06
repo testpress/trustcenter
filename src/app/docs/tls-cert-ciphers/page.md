@@ -78,8 +78,13 @@ Enforcing modern TLS (1.2/1.3) and strong AEAD ciphers preserves **confidentiali
 An SSL Labs scan confirms a strong TLS configuration:
 [https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com](https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com)
 
-**Result:** ✅ Control Passed
-**Last Verified:** 2025-10-06
+**Result:**
+
+✅ Control Passed
+
+**Last Verified:** 
+
+2025-10-06
 
 ## Remediation (If Control Fails)
 
@@ -91,7 +96,9 @@ An SSL Labs scan confirms a strong TLS configuration:
 ## Status
 
 **Control ID:** TLS-CERT-CIPHERS
+
 **Owner:** Platform Security
+
 **Frequency:** Continuous monitoring; formal verification quarterly
 
 (Evidence source: )

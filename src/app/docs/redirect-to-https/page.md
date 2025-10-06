@@ -94,7 +94,9 @@ Example output:
 <Error><Code>AccessDenied</Code><Message>Access Denied.</Message></Error>
 ```
 
-**Result:** ✅ Control Passed
+**Result:** 
+
+✅ Control Passed
 
 ---
 
@@ -111,7 +113,9 @@ If HTTP is neither redirected nor blocked:
 ## Status
 
 **Control ID:** NET-REDIRECT-HTTPS
+
 **Status:** ✅ Implemented and Effective
+
 **Last Verified:** 2025-10-06
 
 ---
