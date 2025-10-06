@@ -5,6 +5,10 @@ on:
     branches:
       - main # Or your default branch
 
+permissions:
+  contents: write   # Needed for Pages deployment
+  id-token: write   # Needed for OIDC token
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
