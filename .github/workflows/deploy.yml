@@ -3,12 +3,13 @@ name: Deploy Next.js to GitHub Pages
 on:
   push:
     branches:
-      - main # Or your default branch
+      - main
   workflow_dispatch: # Manual deployment trigger
 
 permissions:
-  contents: write   # Needed for Pages deployment
-  id-token: write   # Needed for OIDC token
+  contents: write
+  id-token: write
+  pages: write
 
 jobs:
   build-and-deploy:
@@ -21,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Or your desired Node.js version
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
@@ -35,7 +36,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './out' # Next.js static export output directory
+          path: './out'
 
       - name: Deploy to GitHub Pages
         id: deployment
