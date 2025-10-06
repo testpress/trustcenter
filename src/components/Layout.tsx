@@ -48,7 +48,7 @@ function Header() {
       </div>
       <div className="relative flex grow basis-0 items-center">
         <Link
-          href="https://github.com/testpress/trustcenter"
+          href="/"
           aria-label="GitHub repository"
         >
           <Logo className="hidden h-9 w-auto fill-slate-700 lg:block dark:fill-sky-100" />
