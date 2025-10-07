@@ -1,56 +1,45 @@
 export const navigation = [
   {
-    title: 'TLS',
+    title: 'Access Control (RBAC)',
     links: [
-      { title: 'HTTP access should be blocked or redirect to HTTPS', href: '/docs/redirect-to-https' },
-      { title: 'Verify TLS certificate details and strong cipher suites', href: '/docs/tls-cert-ciphers' },
-      { title: 'Weak TLS protocols should be rejected (TLS 1.0 / TLS 1.1)', href: '/docs/weak-protocols' },
-      { title: 'MITM interception should be prevented (proxy testing)', href: '/docs/tls-mitm' },
-
+      { title: 'Bucket-level Restrictions', href: '/trustcenter/docs/auth-rbac-bucket-restriction' },
+      { title: 'Object-level Policies', href: '/trustcenter/docs/auth-rbac-object-restriction' },
+      { title: 'Read-only Users', href: '/trustcenter/docs/auth-rbac-readonly-user' },
+      { title: 'Full-access Users', href: '/trustcenter/docs/auth-rbac-full-access-user' },
     ],
   },
   {
-    title: 'Private Network Endpoints',
+    title: 'Encryption & TLS',
     links: [
-      { title: 'Allowlisted IPs / Subnets Access Verification', href: '/docs/pne-allowed-ips' },
-      { title: 'Connection from Unauthorized IP Should Be Blocked', href: '/docs/pne-unauthorized-ip' },
-      // { title: 'Ping / Scan from Outside VPC Should Fail', href: '/docs/pne-outside-vpc' },
+      { title: 'TLS Enforcement', href: '/trustcenter/docs/enc-tls-data-in-transit' },
+      { title: 'HTTP → HTTPS Redirect', href: '/trustcenter/docs/redirect-to-https' },
+      { title: 'TLS Certificates & Cipher Suites', href: '/trustcenter/docs/tls-cert-ciphers' },
+      { title: 'MITM Protection', href: '/trustcenter/docs/tls-mitm' },
+      { title: 'Weak Protocol Rejection', href: '/trustcenter/docs/weak-protocols' },
     ],
   },
   {
-    title: 'Segmentation',
+    title: 'Data Integrity & Durability',
     links: [
-      { title: 'Direct SSH/RDP Access Restriction', href: '/docs/seg-direct-ssh-rdp-blocked' },
-      { title: 'Administrative Access via Bastion or VPN', href: '/docs/seg-admin-access-bastion-vpn' },
-      { title: 'Internal Services Access Restriction', href: '/docs/seg-internal-services-restriction' },
+      { title: 'Checksum Validation', href: '/trustcenter/docs/erasure-coding-checksum-validation' },
+      { title: 'Object Versioning — Delete & Recover', href: '/trustcenter/docs/rd-vr-delete-recover' },
+      { title: 'Object Versioning — Upload & Overwrite', href: '/trustcenter/docs/rd-vr-upload-overwrite' },
     ],
   },
   {
-    title: 'Fine-grained policies & RBAC',
+    title: 'Network Security',
     links: [
-      { title: 'Read-only User Restrictions', href: '/docs/auth-rbac-readonly-user' },
-      { title: 'Full-access User Operations', href: '/docs/auth-rbac-full-access-user' },
-      { title: 'Bucket-level Access Enforcement', href: '/docs/auth-rbac-bucket-restriction' },
-      { title: 'Object-level Policy Enforcement', href: '/docs/auth-rbac-object-restriction' },
+      { title: 'Allowed IP Access', href: '/trustcenter/docs/pne-allowed-ips' },
+      { title: 'Unauthorized IP Blocking', href: '/trustcenter/docs/pne-unauthorized-ip' },
+      { title: 'External VPC Scan', href: '/trustcenter/docs/pne-outside-vpc' },
     ],
   },
   {
-    title: 'Encryption - Data in Transit',
+    title: 'Administrative & Internal Access',
     links: [
-      { title: 'TLS Enforcement', href: '/docs/enc-tls-data-in-transit' },
-    ],
+      { title: 'Bastion/VPN Administrative Access', href: '/trustcenter/docs/seg-admin-access-bastion-vpn' },
+      { title: 'Direct SSH/RDP Restriction', href: '/trustcenter/docs/seg-direct-ssh-rdp-blocked' },
+      { title: 'Internal Services Restrictions', href: '/trustcenter/docs/seg-internal-services-restriction' },
+    ]
   },
-  {
-    title: 'Erasure Coding & Bitrot Detection',
-    links: [
-      { title: 'Object Integrity Verification', href: '/docs/erasure-coding-checksum-validation' },
-    ],
-  },
-  {
-    title: 'Object Versioning',
-    links: [
-      { title: 'Upload, Overwrite, and Recovery', href: '/docs/rd-vr-upload-overwrite' },
-      { title: 'Delete and Recover', href: '/docs/rd-vr-delete-recover' },
-    ],
-  },
-]
+];
