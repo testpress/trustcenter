@@ -3,8 +3,6 @@ title: "HTTP access should be blocked or redirect to HTTPS"
 description: "Ensure plain HTTP connections to TPStorage endpoints are either redirected to HTTPS or blocked, protecting sensitive data from exposure."
 ---
 
-# HTTP to HTTPS Redirection
-
 ## Overview
 
 To protect data in transit, TPStorage enforces secure HTTPS connections for all endpoints. Any requests made over plain HTTP are either **redirected to HTTPS** or **explicitly blocked**. This ensures that sensitive data such as authentication tokens, credentials, and content metadata are never transmitted in plaintext.

@@ -3,8 +3,6 @@ title: "Verify TLS certificate details and strong cipher suites"
 description: "Confirm the server uses valid TLS certificates and supports only strong, modern cipher suites (TLS 1.2+), ensuring secure encrypted communications."
 ---
 
-# TLS Certificates and Cipher Suites
-
 ## Overview
 
 TPStorage enforces the use of **valid TLS certificates** and **strong, modern cipher suites** for all HTTPS endpoints. This ensures that every client connection is encrypted, authenticated, and resilient against downgrade and cryptographic attacks.
