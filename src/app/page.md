@@ -72,8 +72,8 @@ Our storage infrastructure is secured by layered **network perimeter defenses**.
 
 * 🔐 [Access Control Policies](/trustcenter/docs/auth-rbac-bucket-restriction)
 * 🌍 [Network Security](/trustcenter/docs/pne-allowed-ips)
-* 🧮 [Data Integrity & Versioning](/trustcenter/docs/erasure-coding-checksum-validation)
-* 🔒 [TLS & Encryption](/trustcenter/docs/tls-cert-ciphers)
+* 🧮 [Data Integrity & Durability](/trustcenter/docs/erasure-coding-checksum-validation)
+* 🔒 [Encryption & TLS](/trustcenter/docs/tls-cert-ciphers)
 
 
 ---
