@@ -24,10 +24,10 @@ const lexend = localFont({
 export const metadata: Metadata = {
   title: {
     template: '%s - Docs',
-    default: 'CacheAdvance - Never miss the cache again.',
+    default: 'Trustcenter - Security Reports of Tpstreams and Testpress.',
   },
   description:
-    'Cache every single thing your app could ever do ahead of time, so your code never even has to run at all.',
+    'A centralized repository for all security reports and audits of our products, providing transparency and insights into their safety and reliability.',
 }
 
 export default function RootLayout({
