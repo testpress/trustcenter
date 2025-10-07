@@ -1,6 +1,9 @@
 ---
 title: "Object Versioning — Delete and Recover"
 description: "Ensure previous object versions remain recoverable after deletion in TPStorage."
+imageMap:
+  deleteOldVersion: "@/images/delete_old_version.png"
+
 ---
 
 Delete object → verify previous versions are recoverable
@@ -41,6 +44,24 @@ Download previous version via version ID if needed.
 ## Actual Result
 
 ✅ **Pass**
+
+{% docimage 
+  title="Delete Old Version"
+  src="/trustcenter/images/delete_old_version.png"
+  width=800
+  height=400
+  style="rounded-lg shadow"
+%}
+{% /docimage %}
+
+{% docimage 
+  title="Restore Version"
+  src="/trustcenter/images/restore_version.png"
+  width=800
+  height=400
+  style="rounded-lg shadow"
+%}
+{% /docimage %}
 
 **Notes / Remediation:**
 Ensure previous versions are accessible and metadata is correct.

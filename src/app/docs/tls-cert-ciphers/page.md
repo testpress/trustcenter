@@ -101,4 +101,13 @@ An SSL Labs scan confirms a strong TLS configuration:
 
 **Frequency:** Continuous monitoring; formal verification quarterly
 
-(Evidence source: )
+## Proof
+
+{% docimage 
+  title="SSL Labs Domain details"
+  src="/trustcenter/images/ssllabs.png"
+  width=800
+  height=400
+  style="rounded-lg shadow"
+%}
+{% /docimage %}

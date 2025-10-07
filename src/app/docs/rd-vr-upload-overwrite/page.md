@@ -47,3 +47,14 @@ rclone lsjson rclone-remote:test-bucket/ --versions
 
 **Notes / Remediation:**
 Verify versioning metadata is accurate.
+
+## Proof
+
+{% docimage 
+  title="Multiple versions of same file"
+  src="/trustcenter/images/versioning1.png"
+  width=800
+  height=400
+  style="rounded-lg shadow"
+%}
+{% /docimage %}

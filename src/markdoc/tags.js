@@ -1,5 +1,6 @@
 import { Callout } from '@/components/Callout'
 import { QuickLink, QuickLinks } from '@/components/QuickLinks'
+import { DocImage } from '@/components/DocImage'
 
 const tags = {
   callout: {
@@ -28,6 +29,17 @@ const tags = {
         <figcaption>{caption}</figcaption>
       </figure>
     ),
+  },
+  docimage: {
+    attributes: {
+      title: { type: String },
+      src: { type: String },
+      width: { type: Number },
+      height: { type: Number },
+      quality: { type: Number },
+      style: { type: String },
+    },
+    render: DocImage,
   },
   'quick-links': {
     render: QuickLinks,
