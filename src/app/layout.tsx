@@ -24,7 +24,7 @@ const lexend = localFont({
 export const metadata: Metadata = {
   title: {
     template: '%s - Docs',
-    default: 'Trustcenter - Security Reports of Tpstreams and Testpress.',
+    default: 'Trustcenter - Building Your Trust in Our Products.',
   },
   description:
     'A centralized repository for all security reports and audits of our products, providing transparency and insights into their safety and reliability.',
