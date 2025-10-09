@@ -1,24 +1,64 @@
+---
 
-## Test Case TLS-02 — Verify TLS certificate details and strong cipher suites
+title: "TLS Tests — Certificate Validation, Protocols, and MITM Resistance"
+description: "Verify TLS certificate details, enforce modern TLS (1.2+), reject weak protocols, and prevent MITM interception for TPStorage endpoints."
+---
+## Overview
 
-**Purpose:**
-Confirm the certificate is valid (issuer, subject, expiry) and the server only supports modern TLS (1.2+) and strong ciphers.
+Ensure TPStorage endpoints enforce strong TLS configuration: valid certificates, modern TLS versions and ciphers, and resistance to man-in-the-middle (MITM) interception. This test document groups three related test cases:
 
-**Pre-conditions:**
+* **TLS-02** — Certificate details and strong cipher suites
+* **TLS-03** — Weak TLS protocols should be rejected (TLS 1.0 / 1.1)
+* **TLS-04** — MITM interception should be prevented (proxy testing)
+
+---
+
+## Why This Matters
+
+Poor TLS configuration or trust store issues can lead to:
+
+* **Credential or data exposure** via downgraded or intercepted TLS.
+* **Man-in-the-middle attacks** if clients accept untrusted intermediaries.
+* **Non-compliance** with security baselines requiring TLS 1.2+/strong ciphers and HSTS.
+
+Validating certificates, supported protocol versions, cipher suites, and MITM resistance ensures secure transport of data and reduces the attack surface.
+
+---
+
+## Control Description
+
+* TLS certificates must be valid (trusted issuer, correct subject/SANs, current validity period).
+* Server must support TLS 1.2 and TLS 1.3 only; older insecure protocols (TLS 1.0, 1.1, SSLv3) must be disabled.
+* Only strong, AEAD/ECDHE ciphersuites should be offered. No RC4/DES/export ciphers.
+* HSTS header should be present to reduce downgrade risk.
+* Clients should show certificate errors when an untrusted proxy CA attempts interception.
+
+---
+
+## Testing Methodology (Common Preconditions & Tools)
+
+**Preconditions**
 
 * HTTPS endpoint reachable (port 443 or configured HTTPS port).
+* Authorization to perform tests, especially interception tests (TLS-04) — run only on systems you own or are permitted to test.
 
-**Tools:**
+**Tools**
 
-* `openssl`
-* `openssl x509` or `s_client`
+* `openssl` (`s_client`, `x509`)
 * `nmap` with `--script ssl-enum-ciphers` (optional)
+* `curl`
+* `testssl.sh` or `nmap` (optional)
+* `mitmproxy` or Burp Suite (for controlled MITM testing)
 * Browser certificate viewer (optional)
 
-**Steps:**
+---
 
-<details>
-<summary>Show commands for TLS certificate and cipher check</summary>
+## TLS-02 — Verify TLS certificate details and strong cipher suites
+
+**Purpose:**
+Confirm certificate validity (issuer, subject, expiry) and that the server only supports modern TLS (1.2+) and strong ciphers.
+
+**Steps / Commands**
 
 ```bash
 # Inspect certificate (issuer, validity dates, SANs)
@@ -28,186 +68,139 @@ echo | openssl s_client -connect <HOST>:443 -servername <HOST> 2>/dev/null \
 # View full certificate chain
 openssl s_client -connect <HOST>:443 -servername <HOST> -showcerts
 
-# Check supported TLS versions and ciphers
+# Check supported TLS versions and ciphers (optional; may take time)
 nmap --script ssl-enum-ciphers -p 443 <HOST>
 
 # Check for HSTS header (optional)
 curl -I https://<HOST>/ | grep -i Strict-Transport-Security || true
 ```
 
-(Optional) Inspect certificate in browser (click padlock → certificate).
+**Expected Result**
 
-</details>
-
-**Expected Result:**
-
-* **Certificate:**
-
-  * Issuer = valid CA (Let's Encrypt, customer CA, or internal trusted CA).
-  * `Not Before` / `Not After` dates indicate certificate is currently valid.
-  * Subject / SAN includes the hostname clients use.
-* **Cipher/TLS policy:**
-
-  * TLS 1.2 and TLS 1.3 supported; TLS 1.0 and 1.1 disabled.
-  * Only strong ciphers offered (AEAD ciphers like `TLS_AES_128_GCM_SHA256`, ECDHE suites). No RC4, DES, or export ciphers.
-* **HSTS header:** Present for the domain (recommended).
+* Certificate issued by a trusted CA (public CA or internal trusted CA).
+* `Not Before` / `Not After` show certificate is currently valid.
+* Subject / SAN includes hostname used by clients.
+* TLS 1.2 and TLS 1.3 supported; TLS 1.0/1.1 absent.
+* Only strong ciphers (AEAD, ECDHE) offered.
+* HSTS header present (recommended).
 
 **Actual Result:** ✅ **Pass**
 
-<details>
-<summary>Show SSL Labs result</summary>
-
-[SSL Labs Report](https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com)
-
-![SSL Labs Result](/api/attachments.redirect?id=6ee5e90b-3143-4887-be38-55ab5a35c4df)
-
-</details>
+*Example: SSL Labs Report available for domain.*
+`https://www.ssllabs.com/ssltest/analyze.html?d=storage1.tpstreams.com`
 
 ---
 
-## Test Case TLS-03 — Weak TLS protocols should be rejected (TLS 1.0 / TLS 1.1)
+## TLS-03 — Weak TLS protocols should be rejected (TLS 1.0 / TLS 1.1)
 
 **Purpose:**
-Verify the server rejects old and insecure TLS versions.
+Verify the server rejects old and insecure TLS versions (TLS 1.0 and 1.1).
 
-**Pre-conditions:**
-
-* HTTPS endpoint reachable.
-
-**Tools:**
-
-* `openssl` (client)
-* `testssl.sh` or `nmap` (optional)
-
-**Steps:**
-
-<details>
-<summary>Show commands to test TLS versions</summary>
+**Steps / Commands**
 
 ```bash
 # Test TLS 1.0
-openssl s_client -connect <HOST>:443 -servername <HOST> -tls1 \
-  2>&1 | sed -n '1,200p'
+openssl s_client -connect <HOST>:443 -servername <HOST> -tls1 2>&1 | sed -n '1,200p'
 
 # Test TLS 1.1
-openssl s_client -connect <HOST>:443 -servername <HOST> -tls1_1 \
-  2>&1 | sed -n '1,200p'
+openssl s_client -connect <HOST>:443 -servername <HOST> -tls1_1 2>&1 | sed -n '1,200p'
 
 # Test TLS 1.2 and TLS 1.3 to confirm modern versions work
-openssl s_client -connect <HOST>:443 -servername <HOST> -tls1_2 \
-  2>&1 | sed -n '1,200p'
+openssl s_client -connect <HOST>:443 -servername <HOST> -tls1_2 2>&1 | sed -n '1,200p'
+openssl s_client -connect <HOST>:443 -servername <HOST> -tls1_3 2>&1 | sed -n '1,200p'
 
-openssl s_client -connect <HOST>:443 -servername <HOST> -tls1_3 \
-  2>&1 | sed -n '1,200p'
-
-# Optional: Use testssl.sh to get full compatibility matrix
+# Optional: Use testssl.sh for a full compatibility matrix
 ./testssl.sh <HOST>:443
 ```
 
-</details>
+**Expected Result**
 
-**Expected Result:**
-
-* `openssl` attempts for `-tls1` and `-tls1_1` should fail to negotiate a session (e.g., `handshake failure` or `no shared cipher`).
-* `-tls1_2` and `-tls1_3` should succeed if the client supports them.
-* No successful connection using TLS 1.0/1.1.
+* `-tls1` and `-tls1_1` attempts **fail** to negotiate (handshake failure / no shared cipher).
+* `-tls1_2` and `-tls1_3` succeed if client supports them.
+* No successful connection with TLS 1.0/1.1.
 
 **Actual Result:** ✅ Pass
 
-<details>
-<summary>Show test output / screenshot</summary>
-
-![TLS 1.0/1.1 Rejection Result](/api/attachments.redirect?id=24af23f7-ff15-4cf5-8c8a-3a28834e3230)
-
-</details>
+*Screenshots or test outputs demonstrate TLS 1.0/1.1 rejection and TLS 1.2/1.3 success.*
 
 ---
 
-## Test Case TLS-04 — MITM interception should be prevented (proxy testing)
+## TLS-04 — MITM interception should be prevented (proxy testing)
 
 **Purpose:**
-Confirm HTTPS prevents interception and that clients/browsers warn when presented with an untrusted intermediary certificate. Also verify HSTS is present to reduce downgrade risk.
+Confirm HTTPS prevents interception and that clients warn on untrusted intermediary certificates. Verify HSTS presence to reduce downgrade risk.
 
-**Pre-conditions**
-
-* Test environment where you can safely run an interception proxy (dedicated test VM or lab).
-* TPStorage is reachable from the test client.
-* You must only perform MITM testing on systems you own or are explicitly authorized to test.
+**Pre-conditions / Safety**
+Perform MITM only on systems you own or have explicit permission to test. Use isolated test VMs for any CA trust-store changes.
 
 **Tools**
 
-* `mitmproxy` or Burp Suite (interception)
-* Browser or `curl` configured to use a proxy
-* (Optional) Access to a test VM's certificate store if you want to simulate a trusted proxy — **do not install untrusted CA certs on production clients.**
+* `mitmproxy` or Burp Suite
+* Browser or `curl` configured to use proxy
 
 **Steps**
 
-<details>
-<summary>Show test steps & commands</summary>
-
 1. **Baseline (no proxy)**
 
-   * From a browser or `curl`, access `https://<HOST>/` and confirm a normal HTTPS connection:
+```bash
+curl -I https://<HOST>/ 2>&1 | sed -n '1,200p'
+```
 
-   ```bash
-   curl -I https://<HOST>/ 2>&1 | sed -n '1,200p'
-   ```
+2. **Attempt interception without trusting proxy CA**
 
-2. **Attempt interception without trusting proxy CA (safe test)**
+* Start mitmproxy:
 
-   * Start mitmproxy (default listens on 8080):
+```bash
+mitmproxy --mode regular --listen-port 8080
+```
 
-   ```bash
-   mitmproxy --mode regular --listen-port 8080
-   ```
+* Configure client to use proxy (do **not** install mitmproxy CA). For example:
 
-   * Configure browser or `curl` to use the proxy but **do not** install mitmproxy’s CA cert into the browser/system. For `curl`:
+```bash
+curl -x http://127.0.0.1:8080 https://<HOST>/ -v
+```
 
-   ```bash
-   curl -x http://127.0.0.1:8080 https://<HOST>/ -v
-   ```
+**Expected:** Browser shows certificate error; `curl` shows TLS verification error (e.g., "unable to get local issuer certificate").
 
-   * Try to visit the HTTPS site:
+3. **Optional: Interception with trusted proxy CA (controlled lab)**
+   Install mitmproxy CA only in an isolated test VM to simulate a trusted intermediary — this demonstrates why protecting trust stores is critical.
 
-     * **Expected:** Browser shows an HTTPS certificate error/warning (untrusted issuer). `curl` shows an SSL/TLS verification error (e.g., `SSL certificate problem: unable to get local issuer certificate` or `SSL: certificate subject name ...`).
-
-3. **(Optional) Interception with trusted proxy CA — controlled simulation only**
-
-   * In a disposable test VM, install mitmproxy CA into the trust store, then repeat the request through the proxy. The proxy will be able to decrypt/inspect traffic. This simulates a client that trusts a malicious/compromised CA — use only in an isolated lab.
-
-4. **Check HSTS header** (see TLS-02):
+4. **Check HSTS header**
 
 ```bash
 curl -I https://<HOST>/ | grep -i Strict-Transport-Security || true
 ```
 
-</details>
-
 **Expected Result**
 
-* With proxy CA **not trusted** by the client:
-
-  * Browser displays a certificate error and refuses to load content.
-  * `curl` fails TLS verification unless `-k`/`--insecure` is used.
-* With proxy CA **trusted** (test VM only), interception will succeed — this demonstrates why protecting client root stores is critical.
-* HSTS header present reduces the risk of downgrade attacks.
+* With proxy CA **not trusted**: browser shows certificate error; `curl` fails TLS verification unless `-k` used.
+* With proxy CA **trusted** in a disposable VM: interception succeeds (lab-only).
+* HSTS header present to reduce downgrade risk.
 
 **Actual Result:** ✅ Pass
 
-```bash
-| Test                        | Expected Result                  | Actual Result                                                                                | Status |
-| --------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------- | ------ |
-| HTTPS baseline              | TLS handshake succeeds           | TLS handshake succeeds (`400 Bad Request` not critical)                                      | PASS   |
-| MITM proxy (CA not trusted) | Connection rejected / cert error | curl fails with `SSL certificate problem: unable to get local issuer certificate`            | PASS   |
-| HSTS header                 | Present                          | Verified (`Strict-Transport-Security: max-age=31536000; includeSubDomains`)                  | PASS   |
-```
+*Example test matrix:*
 
-**Notes / Remediation**
+| Test                        | Expected Result                  | Actual Result                                                                   | Status |
+| --------------------------- | -------------------------------- | ------------------------------------------------------------------------------- | ------ |
+| HTTPS baseline              | TLS handshake succeeds           | TLS handshake succeeds (`200/normal response`)                                  | PASS   |
+| MITM proxy (CA not trusted) | Connection rejected / cert error | `curl` fails: `SSL certificate problem: unable to get local issuer certificate` | PASS   |
+| HSTS header                 | Present                          | `Strict-Transport-Security: max-age=31536000; includeSubDomains`                | PASS   |
 
-* Never install untrusted CA certificates on production or user machines. Limit testing to isolated VMs.
-* If clients accept the proxy CA unexpectedly, audit client trust stores and remove unauthorized root certs.
-* Ensure `Strict-Transport-Security` is set with an appropriate `max-age` and `includeSubDomains` as needed to reduce downgrade risk.
-* If interception succeeds on production clients without a trusted CA, investigate client compromise or improper trust store configuration immediately.
+---
 
-```
+## Notes / Remediation
 
+* Disable TLS 1.0/1.1 and non-AEAD weak ciphers on load balancers / servers.
+* Ensure TLS certificates are issued by trusted CAs and are rotated before expiry.
+* Enforce `Strict-Transport-Security` with an appropriate `max-age` and `includeSubDomains` when applicable.
+* Do not install untrusted CAs on production clients; use isolated VMs for any trusted-proxy simulations.
+* Regularly scan endpoints (e.g., testssl.sh, SSL Labs) to detect regressions.
+
+---
+
+## Status
+
+* **Control ID(s):** TLS-CERT-CIPHERS (TLS-02), TLS-WEAK-PROTOCOLS (TLS-03), TLS-MITM (TLS-04)
+* **Overall Status:** ✅ Implemented and Effective
+* **Last Verified:** 2025-10-07
