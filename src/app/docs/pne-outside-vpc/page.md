@@ -1,25 +1,49 @@
 ---
+
 title: "Ping / Scan from Outside VPC Should Fail"
 description: "Ensure TPStorage endpoints are not reachable from the public internet and are protected by firewall rules."
 ---
-Ping / Scan from Outside VPC Should Fail
+## Overview
 
-## Purpose
-Confirm TPStorage is not reachable from the public Internet (ICMP/ping or port scans should be blocked/filtered).
+TPStorage endpoints must be **isolated from the public Internet**. Any external ICMP (ping) or port scan attempts should be blocked or filtered, ensuring that only authorized internal networks can reach storage endpoints.
 
-## Pre-conditions
+---
+
+## Why This Matters
+
+Exposure to the public Internet can lead to:
+
+* **Unauthorized access attempts** to storage services.
+* **Network reconnaissance** that could aid attackers.
+* **Security compliance violations** if endpoints are exposed publicly.
+
+Proper firewall and VPC controls are critical to prevent external access.
+
+---
+
+## Control Description
+
+* TPStorage endpoints are protected by **firewall rules or VPC network policies**.
+* External ICMP or TCP/UDP traffic must be **blocked or filtered**.
+* Only authorized internal subnets should be able to communicate with storage endpoints.
+
+---
+
+## Testing Methodology
+
+**Preconditions:**
 
 * TPStorage hostname or public IP (if any).
-* A test machine that is outside the VPC/subnet (e.g., an external VM or office laptop on public internet).
-* Authorization to test from that external machine.
+* A test machine outside the VPC/subnet (e.g., external VM or office laptop).
+* Authorization to perform external testing.
 
-## Tools
+**Tools Used:**
 
-* `ping`
-* `nmap` (recommended) or `masscan`
-* `traceroute` / `tracepath`
+* `ping` — ICMP reachability.
+* `nmap` or `masscan` — TCP/UDP port scanning.
+* `traceroute` / `tracepath` — path verification.
 
-## Steps
+**Steps Performed:**
 
 ```bash
 # Ping test
@@ -38,16 +62,39 @@ traceroute <TPSTORAGE_HOST_OR_IP>
 nmap -sU -p 123,161 <TPSTORAGE_HOST_OR_IP>
 ```
 
-## Expected Result
+---
 
-* `ping` should time out or show “destination unreachable” / no reply.
-* `nmap` should report ports as filtered or closed, not open.
-* `traceroute` should stop at the network boundary (the firewall/VPC edge).
-* No public-facing services should be reachable.
+## Expected Behavior
 
-## Actual Result
+* `ping` should **time out** or return “destination unreachable.”
+* `nmap` must report ports as **filtered or closed**, not open.
+* `traceroute` should stop at the firewall/VPC boundary.
+* No services should be reachable from external/public networks.
+
+---
+
+## Actual Results
+
 ❌ **Fail**
 
-* ICMP (ping): blocked (100% packet loss) ✅
-* TCP ports: 80, 443, 9000, 9100 are reachable (open) from external internet ❌
-* UDP ports: 123, 161 are open|filtered (needs review) ❌
+* **ICMP (ping):** blocked (100% packet loss) ✅
+* **TCP ports:** 80, 443, 9000, 9100 are reachable from external internet ❌
+* **UDP ports:** 123, 161 are open|filtered (needs review) ❌
+
+---
+
+## Notes / Remediation
+
+* Review firewall and security group rules to block external access.
+* Restrict all TCP/UDP ports to authorized internal subnets only.
+* Ensure ICMP is blocked from public networks.
+* Re-test after remediation to confirm endpoints are not reachable externally.
+
+---
+
+## Status
+
+* **Control ID:** NET-EXTERNAL-ACCESS
+* **Status:** ❌ Remediation Required
+* **Last Verified:** 2025-10-07
+

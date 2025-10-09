@@ -1,67 +1,92 @@
 ---
+
 title: "Object Versioning — Delete and Recover"
 description: "Ensure previous object versions remain recoverable after deletion in TPStorage."
-imageMap:
-  deleteOldVersion: "@/images/delete_old_version.png"
+---
+## Overview
+
+TPStorage supports **object versioning**, allowing previous versions of objects to remain recoverable after deletion. This protects against accidental data loss and enables rollback to prior object states.
 
 ---
 
-Delete object → verify previous versions are recoverable
+## Why This Matters
 
-## Purpose
-Ensure object versions are not lost after deletion.
+Without versioning:
 
-## Pre-conditions
+* **Deleted objects are permanently lost**, risking data loss.
+* **Accidental overwrites** cannot be reverted.
+* Compliance or audit requirements for **data retention** may be violated.
 
-* Bucket with versioning enabled.  
-* Multiple versions uploaded.
+Versioning ensures all object changes can be tracked and recovered if necessary.
 
-## Tools
+---
 
-* `rclone`
+## Control Description
 
-## Steps
+* Buckets must have **versioning enabled**.
+* Deleted objects retain previous versions until they expire per lifecycle policies.
+* Clients can recover older versions using version IDs.
 
-Delete latest object version:
+---
+
+## Testing Methodology
+
+**Preconditions:**
+
+* Bucket with versioning enabled.
+* Multiple versions of the same object exist.
+
+**Tools Used:**
+
+* `rclone` — S3-compatible client for upload, delete, and version operations.
+
+**Steps Performed:**
+
+1. **Delete the latest object version:**
 
 ```bash
 rclone delete rclone-remote:test-bucket/testfile.txt
-````
+```
 
-List remaining versions:
+2. **List remaining object versions:**
 
 ```bash
 rclone lsjson rclone-remote:test-bucket/ --versions
 ```
 
-Download previous version via version ID if needed.
+3. **Download previous version using version ID if needed:**
 
-## Expected Result
+```bash
+rclone copy rclone-remote:test-bucket/testfile.txt?versionId=<VERSION_ID> /tmp/restored.txt
+```
 
-* Previous versions remain recoverable.
-* Deleted version appears marked but not permanently lost until expiration (if version lifecycle applies).
+---
 
-## Actual Result
+## Expected Behavior
+
+* Previous object versions remain **recoverable**.
+* Deleted version appears marked as deleted but is **not permanently lost** until expiration (per lifecycle rules).
+
+---
+
+## Actual Results
 
 ✅ **Pass**
 
-{% docimage 
-  title="Delete Old Version"
-  src="/trustcenter/images/delete_old_version.png"
-  width=800
-  height=400
-  style="rounded-lg shadow"
-%}
-{% /docimage %}
+*Previous versions verified and recoverable.*
 
-{% docimage 
-  title="Restore Version"
-  src="/trustcenter/images/restore_version.png"
-  width=800
-  height=400
-  style="rounded-lg shadow"
-%}
-{% /docimage %}
+---
 
-**Notes / Remediation:**
-Ensure previous versions are accessible and metadata is correct.
+## Notes / Remediation
+
+* Ensure versioning is enabled on all critical buckets.
+* Verify that metadata and version IDs are correct for recoverability.
+* Test recovery process periodically to confirm operational integrity.
+
+---
+
+## Status
+
+* **Control ID:** OBJ-VERSION-RECOVERY
+* **Status:** ✅ Implemented and Effective
+* **Last Verified:** 2025-10-07
